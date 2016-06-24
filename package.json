@@ -1,0 +1,18 @@
+{
+  "name": "hyper-edit",
+  "description": "text editor powered by hyper-string",
+  "version": "0.0.0",
+  "author": "Stephen Whitmore <stephen.whitmore@gmail.com>",
+  "repository": {
+    "url": "git://github.com/noffle/hyper-edit.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/*.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tape": "*"
+  },
+  "license": "ISC"
+}
