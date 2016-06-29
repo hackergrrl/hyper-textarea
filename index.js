@@ -31,7 +31,7 @@ function REdit() {
 var R = REdit.prototype
 
 R.text  = function text (text) {
-  return 'hello'
+  return ''
   // if(!arguments.length)
   //   return this.toJSON().join('')
   
@@ -105,28 +105,48 @@ R.wrap = function (ta) {
   }
   // this.on('_update'  , on_update)
   var pending = false
-  function onInput () {
-    //if(pending) return
-    //pending = true
-    //setTimeout(function () {
-    //pending = false
-    self.text(ta.value)
-    //}, 300)
+  function onInput (ev) {
+    // console.log(ev.returnValue)
+    // var idx = ta.selectionEnd - 1
+    // var chr = ta.value.charAt(idx)
+    // console.log('inserted', chr, '@', idx)
   }
-  function onKeydown () {
+  function onKeydown (ev) {
     start = ta.selectionStart
     end   = ta.selectionEnd
+    // console.log(ev.keyCode)
+  }
+  function onKeyup (ev) {
+    console.log(ev)
+    if (ev.code === 'Backspace') {
+      var idx = ta.selectionEnd
+      var chr = ta.value.charAt(idx)
+      console.log('deleted', chr, '@', idx)
+    } else if (ev.code === 'Delete') {
+      var idx = ta.selectionEnd
+      var chr = ta.value.charAt(idx)
+      console.log('deleted', chr, '@', idx)
+    } else if (/^(Key|Digit)/.test(ev.code)) {
+      // console.log(ta.selectionStart, ta.selectionEnd)
+      var idx = ta.selectionEnd - 1
+      var chr = ta.value.charAt(idx)
+      console.log('inserted', chr, '@', idx)
+    } else {
+      return
+    }
   }
   function onFocus () {
     ta.selectionStart = ta.selectionEnd = start
   }
   ta.addEventListener('input'  , onInput)
   ta.addEventListener('keydown', onKeydown)
+  ta.addEventListener('keyup', onKeyup)
   ta.addEventListener('focus'  , onFocus )
 
   this.unwrap = function () {
     ta.removeEventListener('input'  , onInput)
     ta.removeEventListener('keydown', onKeydown)
+    ta.removeEventListener('keyup', onKeyup)
     ta.removeEventListener('focus'  , onFocus)
     this.removeListener('preupdate' , onPreupdate)
     this.removeListener('_update'   , on_update)
@@ -143,5 +163,4 @@ R.wrap = function (ta) {
 
 document.body.innerHTML = ''
 var r = REdit()
-console.log('r', r.widget)
 document.body.appendChild(r.widget())
