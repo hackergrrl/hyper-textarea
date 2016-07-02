@@ -2,10 +2,19 @@ var hstring = require('hyper-string')
 var memdb = require('memdb')
 var getTextOpStream = require('textarea-op-stream')
 
-function wrap (ta, db) {
+function wrap (ta, db, id) {
   this.opStream = getTextOpStream(ta)
 
   var string = hstring(db)
+  ta.string = string
+
+  string.log.on('add', function (node) {
+    var value = node.value
+    if (Buffer.isBuffer(value)) {
+      value = JSON.parse(value.toString())
+    }
+    console.log(id, 'add', value.chr)
+  })
 
   var self = this
   this.opStream.on('data', function (op) {
@@ -84,11 +93,22 @@ module.exports = wrap
 
 // ---
 
+document.body.innerHTML = ''
 
 var ta = document.createElement('textarea')
 ta.setAttribute('cols', 80)
-ta.setAttribute('rows', 24)
-
-document.body.innerHTML = ''
+ta.setAttribute('rows', 8)
 document.body.appendChild(ta)
-wrap(ta, memdb())
+wrap(ta, memdb(), '1')
+
+var ta2 = document.createElement('textarea')
+ta2.setAttribute('cols', 80)
+ta2.setAttribute('rows', 8)
+document.body.appendChild(ta2)
+wrap(ta2, memdb(), '2')
+
+
+// replicate between
+var r1 = ta.string.createReplicationStream({ live: true })
+var r2 = ta2.string.createReplicationStream({ live: true })
+r1.pipe(r2).pipe(r1)
