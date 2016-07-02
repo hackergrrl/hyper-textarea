@@ -10,7 +10,9 @@
   "scripts": {
     "test": "tape test/*.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "textarea-op-stream": "^0.0.1"
+  },
   "devDependencies": {
     "tape": "*"
   },
