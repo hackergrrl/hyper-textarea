@@ -10,16 +10,36 @@ function wrap (ta, db, id) {
 
   string.log.on('add', function (node) {
     var value = node.value
+    var remote = false
+
+    // TODO: HACK: for now, this means it was a remote op
     if (Buffer.isBuffer(value)) {
       value = JSON.parse(value.toString())
+      remote = true
+      // console.log('I think', id, 'is remote')
     }
-    console.log(id, 'add', value.chr)
+    // console.log(id, 'add', value.chr, remote)
+
+    if (remote) {
+      refresh()
+    }
   })
 
-  var self = this
+  function refresh () {
+    var start = ta.selectionStart
+    var end = ta.selectionEnd
+    string.text(function (err, text) {
+      if (err) throw err
+      ta.value = text
+      // ta.selectionStart = start
+      // ta.selectionEnd = end
+    })
+  }
+
   this.opStream.on('data', function (op) {
     // TODO: prevent race conditions here!
 
+    // console.log(id, 'op-data', op)
     if (op.op === 'insert') {
       string.chars(function (err, chars) {
         if (err) throw err
@@ -33,33 +53,27 @@ function wrap (ta, db, id) {
         string.insert(at, op.str[0], postInsert)
 
         function postInsert (err, elem) {
-          console.log('inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
+          // console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
           at = elem.pos
           toInsert = toInsert.slice(1)
           if (toInsert.length > 0) {
             string.insert(at, toInsert[0], postInsert)
           } else {
-            console.log('DONE')
             string.text(function (err, text) {
-              console.log('FULL TEXT:', text)
+              // console.log(id, 'FULL TEXT:', text)
             })
           }
         }
       })
     } else if (op.op === 'delete') {
-      // 1. find the ID of the char referred to
-      // 2. make successive async deletes
       string.chars(function (err, chars) {
         if (err) throw err
-        console.log('op.pos', op.pos)
-        console.log('chars', chars)
         if (!chars[op.pos]) {
           throw new Error('deletion location doesn\'t exist locally')
         }
 
         // accumulate IDs of inserted chars to delete
         var toDelete = []
-        console.log('chars', chars)
         for (var i=op.pos; i < op.pos + op.count; i++) {
           toDelete.push(chars[i].pos)
         }
@@ -69,15 +83,14 @@ function wrap (ta, db, id) {
         string.delete(at, postDelete)
 
         function postDelete (err, elem) {
-          console.log('deleted @ ' + at)
+          // console.log('deleted @ ' + at)
           at = elem.pos
           toDelete.shift()
           if (toDelete.length > 0) {
             string.delete(at, postDelete)
           } else {
-            console.log('DONE')
             string.text(function (err, text) {
-              console.log('FULL TEXT:', text)
+              // console.log(id, 'FULL TEXT:', text)
             })
           }
         }
