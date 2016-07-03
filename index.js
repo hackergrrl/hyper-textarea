@@ -18,19 +18,33 @@ function wrap (ta, db, id) {
       remote = true
       // console.log('I think', id, 'is remote')
     }
-    // console.log(id, 'add', value.chr, remote)
+    console.log(id, 'add', value.chr, remote)
 
     if (remote) {
       refresh()
     }
   })
 
+  var refreshSemaphor = 0
   function refresh () {
+    if (refreshSemaphor) {
+      refreshSemaphor++
+      return
+    }
+    refreshSemaphor++
+
     var start = ta.selectionStart
     var end = ta.selectionEnd
     string.text(function (err, text) {
       if (err) throw err
+      console.log(id, 'REFRESH to', text)
       ta.value = text
+
+      var sem = refreshSemaphor
+      refreshSemaphor = 0
+      if (sem > 1) {
+        refresh()
+      }
       // ta.selectionStart = start
       // ta.selectionEnd = end
     })
