@@ -1,5 +1,5 @@
 {
-  "name": "hyper-edit",
+  "name": "hyper-textarea",
   "description": "back a textarea with a hyper-string",
   "version": "0.0.0",
   "author": "Stephen Whitmore <stephen.whitmore@gmail.com>",
