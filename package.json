@@ -1,6 +1,6 @@
 {
   "name": "hyper-edit",
-  "description": "text editor powered by hyper-string",
+  "description": "back a textarea with a hyper-string",
   "version": "0.0.0",
   "author": "Stephen Whitmore <stephen.whitmore@gmail.com>",
   "repository": {
