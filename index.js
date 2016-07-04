@@ -21,7 +21,7 @@ function wrap (ta, db, id) {
       remote = true
       // console.log('I think', id, 'is remote')
     }
-    console.log(id, 'add', value.chr, remote)
+    // console.log(id, 'add', value.chr, remote)
 
     if (remote) {
       refresh()
@@ -61,7 +61,7 @@ function wrap (ta, db, id) {
           string.insert(at, op.str[0], postInsert)
 
           function postInsert (err, elem) {
-            // console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
+            console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
             at = elem.pos
             toInsert = toInsert.slice(1)
             if (toInsert.length > 0) {
@@ -85,17 +85,17 @@ function wrap (ta, db, id) {
           var toDelete = []
           for (var i=op.pos; i < op.pos + op.count; i++) {
             toDelete.push(chars[i].pos)
+            console.log('gonna delete', chars[i].pos)
           }
 
           // sequential async deletions
-          at = toDelete[0]
+          at = toDelete.shift()
           string.delete(at, postDelete)
 
           function postDelete (err, elem) {
-            // console.log('deleted @ ' + at)
-            at = elem.pos
-            toDelete.shift()
-            if (toDelete.length > 0) {
+            console.log('deleted @ ' + at)
+            at = toDelete.shift()
+            if (at !== undefined) {
               string.delete(at, postDelete)
             } else {
               release()
