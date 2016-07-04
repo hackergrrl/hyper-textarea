@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "hyper-string": "^0.0.2",
+    "mutexify": "^1.1.0",
     "textarea-op-stream": "^0.0.1"
   },
   "devDependencies": {

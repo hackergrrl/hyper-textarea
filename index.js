@@ -1,9 +1,12 @@
 var hstring = require('hyper-string')
 var memdb = require('memdb')
 var getTextOpStream = require('textarea-op-stream')
+var mutexify = require('mutexify')
 
 function wrap (ta, db, id) {
-  this.opStream = getTextOpStream(ta)
+  var opStream = getTextOpStream(ta)
+
+  var lock = mutexify()
 
   var string = hstring(db)
   ta.string = string
@@ -25,91 +28,85 @@ function wrap (ta, db, id) {
     }
   })
 
-  var refreshSemaphor = 0
   function refresh () {
-    if (refreshSemaphor) {
-      refreshSemaphor++
-      return
-    }
-    refreshSemaphor++
-
-    var start = ta.selectionStart
-    var end = ta.selectionEnd
-    string.text(function (err, text) {
-      if (err) throw err
-      console.log(id, 'REFRESH to', text)
-      ta.value = text
-
-      var sem = refreshSemaphor
-      refreshSemaphor = 0
-      if (sem > 1) {
-        refresh()
-      }
-      // ta.selectionStart = start
-      // ta.selectionEnd = end
+    lock(function(release) {
+      var start = ta.selectionStart
+      var end = ta.selectionEnd
+      string.text(function (err, text) {
+        if (err) throw err
+        // console.log(id, 'REFRESH to', text)
+        ta.value = text
+        // ta.selectionStart = start
+        // ta.selectionEnd = end
+        release()
+      })
     })
   }
 
-  this.opStream.on('data', function (op) {
+  opStream.on('data', function (op) {
     // TODO: prevent race conditions here!
 
-    // console.log(id, 'op-data', op)
-    if (op.op === 'insert') {
-      string.chars(function (err, chars) {
-        if (err) throw err
-        var at = null
-        if (op.pos && chars[op.pos - 1]) {
-          at = chars[op.pos - 1].pos
-        }
-
-        // recursive async insertions
-        var toInsert = op.str
-        string.insert(at, op.str[0], postInsert)
-
-        function postInsert (err, elem) {
-          // console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
-          at = elem.pos
-          toInsert = toInsert.slice(1)
-          if (toInsert.length > 0) {
-            string.insert(at, toInsert[0], postInsert)
-          } else {
-            string.text(function (err, text) {
-              // console.log(id, 'FULL TEXT:', text)
-            })
+    lock(function (release) {
+      console.log(id, 'op-data', op)
+      if (op.op === 'insert') {
+        string.chars(function (err, chars) {
+          if (err) throw err
+          var at = null
+          if (op.pos && chars[op.pos - 1]) {
+            at = chars[op.pos - 1].pos
           }
-        }
-      })
-    } else if (op.op === 'delete') {
-      string.chars(function (err, chars) {
-        if (err) throw err
-        if (!chars[op.pos]) {
-          throw new Error('deletion location doesn\'t exist locally')
-        }
 
-        // accumulate IDs of inserted chars to delete
-        var toDelete = []
-        for (var i=op.pos; i < op.pos + op.count; i++) {
-          toDelete.push(chars[i].pos)
-        }
+          // recursive async insertions
+          var toInsert = op.str
+          string.insert(at, op.str[0], postInsert)
 
-        // sequential async deletions
-        at = toDelete[0]
-        string.delete(at, postDelete)
-
-        function postDelete (err, elem) {
-          // console.log('deleted @ ' + at)
-          at = elem.pos
-          toDelete.shift()
-          if (toDelete.length > 0) {
-            string.delete(at, postDelete)
-          } else {
-            string.text(function (err, text) {
-              // console.log(id, 'FULL TEXT:', text)
-            })
+          function postInsert (err, elem) {
+            // console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
+            at = elem.pos
+            toInsert = toInsert.slice(1)
+            if (toInsert.length > 0) {
+              string.insert(at, toInsert[0], postInsert)
+            } else {
+              release()
+              // string.text(function (err, text) {
+              //   console.log(id, 'FULL TEXT:', text)
+              // })
+            }
           }
-        }
-      })
-    }
+        })
+      } else if (op.op === 'delete') {
+        string.chars(function (err, chars) {
+          if (err) throw err
+          if (!chars[op.pos]) {
+            throw new Error('deletion location doesn\'t exist locally')
+          }
+
+          // accumulate IDs of inserted chars to delete
+          var toDelete = []
+          for (var i=op.pos; i < op.pos + op.count; i++) {
+            toDelete.push(chars[i].pos)
+          }
+
+          // sequential async deletions
+          at = toDelete[0]
+          string.delete(at, postDelete)
+
+          function postDelete (err, elem) {
+            // console.log('deleted @ ' + at)
+            at = elem.pos
+            toDelete.shift()
+            if (toDelete.length > 0) {
+              string.delete(at, postDelete)
+            } else {
+              release()
+              // string.text(function (err, text) {
+              //   console.log(id, 'FULL TEXT:', text)
+              // })
+            }
+          }
+        })
+      }
+    })
   })
 
   return ta
