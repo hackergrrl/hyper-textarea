@@ -9,7 +9,8 @@ TODO: fill this in
 
 ## Usage
 
-Let's create two `textarea` elements and back them with a hyper-string:
+Let's create two `textarea` elements on the same page and back each with their
+own hyper-string:
 
 ```js
 $ cat > example.js
@@ -37,7 +38,7 @@ r1.pipe(r2).pipe(r1)
 ^D
 ```
 
-Now we'll start up a dev server + browserify/watchify process with
+Now start up a dev server + browserify/watchify process with
 [wzrd](https://github.com/maxogden/wzrd):
 
 ```
@@ -45,8 +46,8 @@ $ wzrd example.js:bundle.js
 server started at http://localhost:9967
 ```
 
-And take a look! Everything you type in one textarea will be replicated to the
-other.
+Take a look! Everything you type in one textarea will be replicated to the
+other in realtime.
 
 ## Peer-to-peer Browser Usage
 
@@ -96,7 +97,7 @@ server started at http://localhost:9967
 ```
 
 Now open two browser tabs pointing at this address. They'll find each other via
-signalhub and start live replicating their textareas!
+signalhub and start live replicating their text content!
 
 ## API
 
