@@ -1,9 +1,10 @@
 var hstring = require('hyper-string')
-var memdb = require('memdb')
 var getTextOpStream = require('textarea-op-stream')
 var mutexify = require('mutexify')
 
-function wrap (ta, db, id) {
+module.exports = function (ta, db, id) {
+  id = id || (''+Math.random()).substring(2, 3)
+
   var opStream = getTextOpStream(ta)
 
   var lock = mutexify()
@@ -46,8 +47,9 @@ function wrap (ta, db, id) {
   opStream.on('data', function (op) {
     // TODO: prevent race conditions here!
 
+    var start = new Date().getTime()
     lock(function (release) {
-      console.log(id, 'op-data', op)
+      // console.log(id, 'op-data', op)
       if (op.op === 'insert') {
         string.chars(function (err, chars) {
           if (err) throw err
@@ -61,12 +63,14 @@ function wrap (ta, db, id) {
           string.insert(at, op.str[0], postInsert)
 
           function postInsert (err, elem) {
-            console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
+            // console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
             at = elem.pos
             toInsert = toInsert.slice(1)
             if (toInsert.length > 0) {
               string.insert(at, toInsert[0], postInsert)
             } else {
+              var end = new Date().getTime()
+              // console.log('insert took', (end-start), 'ms')
               release()
               // string.text(function (err, text) {
               //   console.log(id, 'FULL TEXT:', text)
@@ -85,7 +89,7 @@ function wrap (ta, db, id) {
           var toDelete = []
           for (var i=op.pos; i < op.pos + op.count; i++) {
             toDelete.push(chars[i].pos)
-            console.log('gonna delete', chars[i].pos)
+            // console.log('gonna delete', chars[i].pos)
           }
 
           // sequential async deletions
@@ -93,7 +97,7 @@ function wrap (ta, db, id) {
           string.delete(at, postDelete)
 
           function postDelete (err, elem) {
-            console.log('deleted @ ' + at)
+            // console.log('deleted @ ' + at)
             at = toDelete.shift()
             if (at !== undefined) {
               string.delete(at, postDelete)
@@ -111,28 +115,3 @@ function wrap (ta, db, id) {
 
   return ta
 }
-
-module.exports = wrap
-
-
-// ---
-
-document.body.innerHTML = ''
-
-var ta = document.createElement('textarea')
-ta.setAttribute('cols', 80)
-ta.setAttribute('rows', 8)
-document.body.appendChild(ta)
-wrap(ta, memdb(), '1')
-
-var ta2 = document.createElement('textarea')
-ta2.setAttribute('cols', 80)
-ta2.setAttribute('rows', 8)
-document.body.appendChild(ta2)
-wrap(ta2, memdb(), '2')
-
-
-// replicate between
-var r1 = ta.string.createReplicationStream({ live: true })
-var r2 = ta2.string.createReplicationStream({ live: true })
-r1.pipe(r2).pipe(r1)
