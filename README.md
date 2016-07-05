@@ -56,7 +56,7 @@ Let's let two different browsers edit a textarea collaboratively, using
 browser-to-browser peering:
 
 ```js
-cat > p2p-example.js
+$ cat > p2p-example.js
 var swarm = require('webrtc-swarm')
 var signalhub = require('signalhub')
 var hyperize = require('./')
