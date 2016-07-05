@@ -1,11 +1,7 @@
 # hyper-textarea
 
 > Back a textarea with a [hyper-string](https://github.com/noffle/hyper-string)
-> for conflict-free p2p replication!
-
-## Background
-
-TODO: fill this in
+> for live conflict-free p2p replication!
 
 ## Usage
 
