@@ -107,19 +107,20 @@ var hyperize = require('hyper-textarea')
 ### var hstring = hyperize(textarea, db)
 
 Backs a textarea element with a
-[hyper-string](https://github.com/noffle/hyper-string). Adds the property
-`string` to the textarea, so you can create a replication stream via
-
-```js
-textarea.string.createReplicationStream({ live: true })
-```
+[hyper-string](https://github.com/noffle/hyper-string).
 
 `db` is a [LevelUP](https://github.com/Level/levelup) instance, to abstract away
 the storage of the hyper-string. You could use
 [memdb](https://github.com/juliangruber/memdb) for in-memory, or
 [level](https://github.com/Level/level) for on-disk.
 
-The hyper-string instance is returned.
+The hyper-string instance is returned, so you can create a live replication
+stream:
+
+```js
+textarea.string.createReplicationStream({ live: true })
+```
+
 
 ## Install
 
