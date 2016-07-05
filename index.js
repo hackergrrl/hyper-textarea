@@ -10,7 +10,6 @@ module.exports = function (ta, db, id) {
   var lock = mutexify()
 
   var string = hstring(db)
-  ta.string = string
 
   string.log.on('add', function (node) {
     var value = node.value
@@ -113,5 +112,5 @@ module.exports = function (ta, db, id) {
     })
   })
 
-  return ta
+  return string
 }
