@@ -45,7 +45,7 @@ module.exports = function (ta, db, id) {
 
         // console.log(id, 'REFRESH to', text)
         ta.value = text
-        ta.dispatchEvent(new Event('remote-input'))
+        ta.dispatchEvent(new Event('focus'))
         ta.selectionStart = start + offset
         ta.selectionEnd = end + offset
         release()
