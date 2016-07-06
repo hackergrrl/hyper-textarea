@@ -24,20 +24,30 @@ module.exports = function (ta, db, id) {
     // console.log(id, 'add', value.chr, remote)
 
     if (remote) {
-      refresh()
+      refresh(value.op === 'insert' ? node.key : undefined)
     }
   })
 
-  function refresh () {
+  function refresh (insertedAt) {
     lock(function(release) {
       var start = ta.selectionStart
       var end = ta.selectionEnd
-      string.text(function (err, text) {
+      var offset = 0
+
+      string.chars(function (err, chars) {
         if (err) throw err
+        var text = chars.map(function (c) { return c.chr }).join('')
+
+        for (var i=0; i < chars.length; i++) {
+          if (i > ta.selectionStart) break
+          if (chars[i].pos === insertedAt) { offset++; break }
+        }
+
         // console.log(id, 'REFRESH to', text)
         ta.value = text
-        // ta.selectionStart = start
-        // ta.selectionEnd = end
+        ta.dispatchEvent(new Event('remote-input'))
+        ta.selectionStart = start + offset
+        ta.selectionEnd = end + offset
         release()
       })
     })
