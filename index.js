@@ -11,6 +11,8 @@ module.exports = function (ta, db, id) {
 
   var string = hstring(db)
 
+  string.index.ready(refresh)
+
   string.log.on('add', function (node) {
     var value = node.value
     var remote = false
