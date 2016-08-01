@@ -19,17 +19,17 @@ var ta = document.createElement('textarea')
 ta.setAttribute('cols', 80)
 ta.setAttribute('rows', 8)
 document.body.appendChild(ta)
-hyperize(ta, memdb())
+var string = hyperize(ta, memdb())
 
 var ta2 = document.createElement('textarea')
 ta2.setAttribute('cols', 80)
 ta2.setAttribute('rows', 8)
 document.body.appendChild(ta2)
-hyperize(ta2, memdb())
+var string2 = hyperize(ta2, memdb())
 
 // replicate between the two!
-var r1 = ta.string.createReplicationStream({ live: true })
-var r2 = ta2.string.createReplicationStream({ live: true })
+var r1 = string.log.createReplicationStream({ live: true })
+var r2 = string2.log.createReplicationStream({ live: true })
 r1.pipe(r2).pipe(r1)
 ^D
 ```
@@ -75,7 +75,7 @@ var sw = swarm(hub)
 
 sw.on('peer', function (peer, id) {
   console.log('connected to a new peer:', id)
-  var r = string.createReplicationStream({ live: true })
+  var r = string.log.createReplicationStream({ live: true })
   r.pipe(peer).pipe(r)
 })
 
@@ -112,10 +112,10 @@ the storage of the hyper-string. You could use
 [level](https://github.com/Level/level) for on-disk.
 
 The hyper-string instance is returned, so you can create a live replication
-stream:
+stream from its `.log` property:
 
 ```js
-textarea.string.createReplicationStream({ live: true })
+hstring.log.createReplicationStream({ live: true })
 ```
 
 
