@@ -13,7 +13,7 @@
   "dependencies": {
     "hyper-string": "^1.0.1",
     "mutexify": "^1.1.0",
-    "textarea-op-stream": "^0.1.1"
+    "textarea-op-stream": "^1.0.0"
   },
   "devDependencies": {
     "tape": "*"
