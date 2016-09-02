@@ -74,25 +74,10 @@ module.exports = function (ta, db, id) {
             at = chars[op.pos - 1].pos
           }
 
-          // recursive async insertions
-          var toInsert = op.str
-          string.insert(at, op.str[0], postInsert)
-
-          function postInsert (err, elem) {
-            // console.log('local inserted "' + elem.chr + '" @ ' + elem.pos + ' (after ' + at + ')')
-            at = elem.pos
-            toInsert = toInsert.slice(1)
-            if (toInsert.length > 0) {
-              string.insert(at, toInsert[0], postInsert)
-            } else {
-              var end = new Date().getTime()
-              // console.log('insert took', (end-start), 'ms')
-              release()
-              // string.text(function (err, text) {
-              //   console.log(id, 'FULL TEXT:', text)
-              // })
-            }
-          }
+          string.insert(at, op.str, function (err, ops) {
+            if (err) throw err
+            release()
+          })
         })
       } else if (op.op === 'delete') {
         string.chars(function (err, chars) {
@@ -108,22 +93,10 @@ module.exports = function (ta, db, id) {
             // console.log('gonna delete', chars[i].pos)
           }
 
-          // sequential async deletions
-          at = toDelete.shift()
-          string.delete(at, postDelete)
-
-          function postDelete (err, elem) {
-            // console.log('deleted @ ' + at)
-            at = toDelete.shift()
-            if (at !== undefined) {
-              string.delete(at, postDelete)
-            } else {
-              release()
-              // string.text(function (err, text) {
-              //   console.log(id, 'FULL TEXT:', text)
-              // })
-            }
-          }
+          string.delete(op.pos, op.count, function (err, ops) {
+            if (err) throw err
+            release()
+          })
         })
       }
     })
