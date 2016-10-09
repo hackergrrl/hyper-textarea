@@ -86,14 +86,9 @@ module.exports = function (ta, db, id) {
             throw new Error('deletion location doesn\'t exist locally')
           }
 
-          // accumulate IDs of inserted chars to delete
-          var toDelete = []
-          for (var i=op.pos; i < op.pos + op.count; i++) {
-            toDelete.push(chars[i].pos)
-            // console.log('gonna delete', chars[i].pos)
-          }
+          var at = chars[op.pos].pos
 
-          string.delete(op.pos, op.count, function (err, ops) {
+          string.delete(at, op.count, function (err, ops) {
             if (err) throw err
             release()
           })
