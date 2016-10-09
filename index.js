@@ -39,8 +39,6 @@ module.exports = function (ta, db, id) {
 
   function refresh (insertedAt) {
     lock(function (release) {
-      var start = ta.selectionStart
-      var end = ta.selectionEnd
       var isFocused = document.activeElement === ta
       var offset = 0
 
@@ -54,6 +52,8 @@ module.exports = function (ta, db, id) {
         }
 
         debug(id, 'REFRESH to', text)
+        var start = ta.selectionStart
+        var end = ta.selectionEnd
         ta.value = text
 
         // If the textarea is focused, ensure its cursor position is maintained
