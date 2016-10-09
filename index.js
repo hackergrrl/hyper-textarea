@@ -12,10 +12,14 @@ module.exports = function (ta, db, id) {
 
   var string = hstring(db)
 
-  string.index.ready(function () {
+  var pendingIndexReady = false
+
+  function ready () {
     debug('hyper-string indexer is ready!')
+    pendingIndexReady = false
     refresh()
-  })
+  }
+  string.index.ready(ready)
 
   string.log.on('add', function (node) {
     var value = node.value
@@ -33,7 +37,14 @@ module.exports = function (ta, db, id) {
 
     if (remote) {
       debug('refreshing due to remote op', value)
-      refresh(value.op === 'insert' ? node.key : undefined)
+      // refresh(value.op === 'insert' ? node.key : undefined)
+      if (!pendingIndexReady) {
+        debug('scheduled INDEX')
+        string.index.ready(ready)
+        pendingIndexReady = true
+      } else {
+        debug('skipped scheduling INDEX')
+      }
     }
   })
 
