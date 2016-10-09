@@ -1,6 +1,7 @@
 var hstring = require('hyper-string')
 var getTextOpStream = require('textarea-op-stream')
 var mutexify = require('mutexify')
+var debug = require('debug')('hyper-textarea')
 
 module.exports = function (ta, db, id) {
   id = id || ('' + Math.random()).substring(2, 3)
@@ -11,7 +12,10 @@ module.exports = function (ta, db, id) {
 
   var string = hstring(db)
 
-  string.index.ready(refresh)
+  string.index.ready(function () {
+    debug('hyper-string indexer is ready!')
+    refresh()
+  })
 
   string.log.on('add', function (node) {
     var value = node.value
@@ -25,7 +29,10 @@ module.exports = function (ta, db, id) {
     }
     // console.log(id, 'add', value.chr, remote)
 
+    debug('hyper-string gave us a ' + (remote ? 'remote' : 'local') + ' "add":', node)
+
     if (remote) {
+      debug('refreshing due to remote op', value)
       refresh(value.op === 'insert' ? node.key : undefined)
     }
   })
@@ -46,7 +53,7 @@ module.exports = function (ta, db, id) {
           if (chars[i].pos === insertedAt) { offset++; break }
         }
 
-        // console.log(id, 'REFRESH to', text)
+        debug(id, 'REFRESH to', text)
         ta.value = text
 
         // If the textarea is focused, ensure its cursor position is maintained
@@ -65,15 +72,18 @@ module.exports = function (ta, db, id) {
 
     var start = new Date().getTime()
     lock(function (release) {
-      // console.log(id, 'op-data', op)
+      debug(id, 'got an op:', op)
       if (op.op === 'insert') {
         string.chars(function (err, chars) {
           if (err) throw err
           var at = null
           if (op.pos && chars[op.pos - 1]) {
             at = chars[op.pos - 1].pos
+          } else {
+            debug('FYI: inserting op (' + op + ') at pos NULL')
           }
 
+          debug('inserting: ', op)
           string.insert(at, op.str, function (err, ops) {
             if (err) throw err
             release()
@@ -88,6 +98,7 @@ module.exports = function (ta, db, id) {
 
           var at = chars[op.pos].pos
 
+          debug('deleting: ', op)
           string.delete(at, op.count, function (err, ops) {
             if (err) throw err
             release()
