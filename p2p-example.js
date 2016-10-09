@@ -11,7 +11,6 @@ ta.setAttribute('rows', 8)
 document.body.appendChild(ta)
 var string = hyperize(ta, memdb())
 
-
 var hub = signalhub('hyper-textarea', [
   'https://signalhub.mafintosh.com'
 ])

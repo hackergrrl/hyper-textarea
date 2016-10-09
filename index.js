@@ -3,7 +3,7 @@ var getTextOpStream = require('textarea-op-stream')
 var mutexify = require('mutexify')
 
 module.exports = function (ta, db, id) {
-  id = id || (''+Math.random()).substring(2, 3)
+  id = id || ('' + Math.random()).substring(2, 3)
 
   var opStream = getTextOpStream(ta)
 
@@ -31,7 +31,7 @@ module.exports = function (ta, db, id) {
   })
 
   function refresh (insertedAt) {
-    lock(function(release) {
+    lock(function (release) {
       var start = ta.selectionStart
       var end = ta.selectionEnd
       var isFocused = document.activeElement === ta
@@ -41,7 +41,7 @@ module.exports = function (ta, db, id) {
         if (err) throw err
         var text = chars.map(function (c) { return c.chr }).join('')
 
-        for (var i=0; i < chars.length; i++) {
+        for (var i = 0; i < chars.length; i++) {
           if (i > ta.selectionStart) break
           if (chars[i].pos === insertedAt) { offset++; break }
         }
