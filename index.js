@@ -1,9 +1,8 @@
-var hstring = require('hyper-string')
 var getTextOpStream = require('textarea-op-stream')
 var mutexify = require('mutexify')
 var debug = console.log //require('debug')('hyper-textarea')
 
-module.exports = function (ta, db, id) {
+module.exports = function (ta, string, id) {
   id = id || ('' + Math.random()).substring(2, 3)
 
   var opStream = getTextOpStream(ta)
@@ -14,8 +13,6 @@ module.exports = function (ta, db, id) {
   var pendingRefresh = false
 
   var pendingLocalInserts = {}
-
-  var string = hstring(db)
 
   function ready () {
     debug('hyper-string indexer is ready!')
@@ -40,13 +37,6 @@ module.exports = function (ta, db, id) {
     if (remote) {
       debug('refreshing due to remote op', value)
       refresh(value.op === 'insert' ? node.key : undefined)
-      // if (!pendingIndexReady) {
-      //   debug('scheduled INDEX')
-      //   string.index.ready(ready)
-      //   pendingIndexReady = true
-      // } else {
-      //   debug('skipped scheduling INDEX')
-      // }
     }
   })
 

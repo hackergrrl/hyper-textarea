@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "debug": "^2.2.0",
-    "hyper-string": "^2.0.0",
     "mutexify": "^1.1.0",
     "textarea-op-stream": "^2.0.0"
   },
