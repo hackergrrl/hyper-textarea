@@ -32,7 +32,7 @@ module.exports = function (ta, string, id) {
     if (remote && pendingLocalOps.length === 0) {
       debug('refreshing due to remote op', value)
 
-      if (value.op === 'insert') {
+      if (value.op === 'insert' && cache) {
         var offset = computeNeededCursorOffset(ta.selectionStart, node.key, cache.chars)
         pendingCursorOffset += offset
       }
