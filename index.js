@@ -102,7 +102,7 @@ module.exports = function (ta, string, id) {
       var chars = cache.chars
       if (op.op === 'insert') {
         var at = null
-        console.log('insert', op.pos, chars)
+        console.log('insert local op', op.pos, chars)
         if (op.pos && chars[op.pos - 1]) {
           at = chars[op.pos - 1].pos
         } else {
@@ -119,11 +119,11 @@ module.exports = function (ta, string, id) {
           cache.text = splice(cache.text, op.pos, 0, op.str)
           var newChars = ops.map(function (op, idx) {
             return {
-              chr: op.str[idx],
+              chr: op.chr,
               pos: op.pos
             }
           })
-          cache.chars.splice.apply(this, [op.pos, 0].concat(newChars))
+          cache.chars.splice.apply(cache.chars, [op.pos, 0].concat(newChars))
 
           processOpQueue()
         })
