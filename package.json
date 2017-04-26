@@ -4,7 +4,7 @@
   "version": "0.2.3",
   "author": "Stephen Whitmore <stephen.whitmore@gmail.com>",
   "repository": {
-    "url": "git://github.com/noffle/hyper-edit.git"
+    "url": "git://github.com/noffle/hyper-textarea.git"
   },
   "main": "index.js",
   "scripts": {
