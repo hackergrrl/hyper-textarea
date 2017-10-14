@@ -4,6 +4,8 @@ var debug = console.log //require('debug')('hyper-textarea')
 module.exports = function (ta, string, id) {
   id = id || ('' + Math.random()).substring(2, 3)
 
+  patchTabSupport(ta)
+
   var opStream = getTextOpStream(ta)
 
   var pendingLocalOps = []
@@ -178,3 +180,16 @@ function splice (text, start, delCount, toAdd) {
   return text.substring(0, start) + toAdd + text.substring(start + delCount)
 }
 
+// Thanks ansuz!
+function patchTabSupport (ta) {
+  ta.addEventListener('keydown', function (e) {
+    if (e.keyCode !== 9) return
+    var start = this.selectionStart
+    var end = this.selectionEnd
+    var target = e.target
+    var value = target.value
+    target.value = value.substring(0, start) + "\t" + value.substring(end)
+    this.selectionStart = this.selectionEnd = start + 1
+    e.preventDefault()
+  })
+}
