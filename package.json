@@ -1,7 +1,7 @@
 {
   "name": "hyper-textarea",
   "description": "back a textarea with a hyper-string",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "Stephen Whitmore <stephen.whitmore@gmail.com>",
   "repository": {
     "url": "git://github.com/noffle/hyper-textarea.git"
